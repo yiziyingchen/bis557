@@ -6,11 +6,12 @@
 #' @param data a data.frame
 #' @return An lm object
 #' @importFrom stats lm
+#' @import stats model.frame model.matrix
 #' @examples
 #' @export
 linear_model <- function(formula, data) {
-    X = model.matrix(formula, data)
-    Y= model.frame(formula,data)[,1]
+    X = stats::model.matrix(formula, data)
+    Y= stats::model.frame(formula,data)[,1]
     beta <- qr.solve(X,Y)
     for (i in 1:length(beta)){
         if (beta[i] == 0)
