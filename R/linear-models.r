@@ -15,6 +15,7 @@ linear_model <- function(formula, data) {
     for (i in 1:length(beta)){
         if (beta[i] == 0)
         beta[i] = NA
+        
     }
     ret <- list()
     ret$coefficients = c(beta)
