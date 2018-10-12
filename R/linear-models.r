@@ -5,9 +5,9 @@
 #' @param formula a formula
 #' @param data a data.frame
 #' @return An lm object
-#' @importFrom stats lm
-#' @import stats model.frame model.matrix
+#' @import stats
 #' @examples
+#' fit = linear_model(Sepal.Length ~., iris)
 #' @export
 linear_model <- function(formula, data) {
     X = stats::model.matrix(formula, data)

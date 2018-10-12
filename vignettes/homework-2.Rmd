@@ -1,0 +1,99 @@
+---
+title: "BIS557 Homework-2 Ridge Regression"
+output: rmarkdown::html_vignette
+author: Yiziying Chen
+vignette: >
+  %\VignetteIndexEntry{Put the title of your vignette here}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r}
+# install the "bis557" library
+library(bis557)
+#get 2 datafiles, train and test
+data("ridge_train")
+data("ridge_test")
+
+# define the formula
+form = y ~. - 1
+```
+For a square matrix $X$, the total variance of predicted OLS regression vector increases as the correlation between columns of $X$ increases. It is difficult to solve this problem related to the ratio between the largest and the smallest singular values of $X$. To solve this issue, we use ridge regression, which introduces a new matrix $X'$ that modifies the specific singular values all by a fixed factor of $\lambda$:
+
+<center>       
+$\sigma_j -> \sigma_j + \lambda$
+
+$U(\sum + 1_p \cdot \lambda)V^t b = z$
+
+$(X^t X + 1_p \cdot \lambda)b = X^t y$
+</center>            
+
+`ridge_reg` is a function that can be used to calculate the ridge regression between a given matrix $X$ and $y$. The ridge regression vector minimizes a combination of the sum of squares and the size of regression vector. To apply `ridge_reg` function, we will first need to compute the range of best choice of $\lambda$. By expanding the matrix $X$ by its **SVD**, we get:
+
+<center> $b = v \cdot Diag(\frac{\sigma_1}{\sigma_1^2 + \lambda},...,\frac{\sigma_p}{\sigma_p^2 + \lambda}) \cdot U^t y$
+</center>
+
+Reasonable values of the parameter $\lambda$ can be inferred from the range of the singular values of the training data:
+<center> $Diag(\frac{\sigma_1}{\sigma_1^2 + \lambda},...,\frac{\sigma_p}{\sigma_p^2 + \lambda})$
+</center>
+
+which is simple the diagonal matrix of the $\beta$ decomposition.
+
+We decompose the matrix and obtain the range of diagonal matrix of the decomposition:
+```{r}
+X = model.matrix(form, ridge_train)
+  matrix <- t(X) %*% X
+  duv <- svd(X)
+  d = 1/duv$d
+
+lambda_log = ceiling(log(range(d), base = 10))
+```
+The logrithmic range of singular value appears to be around 10^-2 to 10^1. To cover more of the variance difference, we extend the range with an additional 10^2 fold and obtain a sequence of tunning values $\lambda$ (by 0.1 increment).
+
+```{r}
+  log_lambda0 = seq((lambda_log+ c(-2,2))[1],(lambda_log+ c(-2,2))[2], 0.1)
+  lam0 = 10^log_lambda0
+```
+
+To find the best $\lambda$ value that minimizes the mean square error (**MSE**), we use the `mse_ridge_resid` function to validate `ridge_train` dataset over `ridge_test` dataset, `vapply` every single $lambda$ value to the function and plot these **MSE** values over all $\lambda$.
+
+```{r}
+  
+  mse_ridge_resid = function(form, lambda, dattrain, dattest){
+  m = model.matrix(form, dattest) 
+  y = matrix(dattest[,as.character(form)[2]], ncol = 1)
+  y = y[as.numeric(rownames(m)),,drop = FALSE]
+  beta = ridge_reg(form, lambda, dattrain)$coefficients
+  
+  yhat = m %*% beta
+  mean((y - yhat)^2)
+  }
+
+  mse_test =  vapply(lam0, function(x) mse_ridge_resid(form, x, ridge_train, ridge_test), as.numeric(NA))
+  plot(log_lambda0, mse_test)
+  
+```
+
+The scatter plot shows that MSE score reaches the lowest point with the choice of $\lambda$ value locates at somewhere in between 1 and 2. So we narrow down the range of $\lambda$ to a sequence of values between 1 and 2 with increment of 0.01 and `vapply` back to the `mse_ridge_resid` function again to plot the new range of **MSE** score.
+
+```{r}
+  log_lambda1 = seq(1,2, 0.01)
+  lam1 = 10^log_lambda1
+  mse_test1 =  vapply(lam1, function(x) mse_ridge_resid(form, x, ridge_train, ridge_test), as.numeric(NA))
+  plot(log_lambda1, mse_test1)
+  log_lambda1[which.min(mse_test1)]
+```
+The scatter plot shows the minimum **MSE** socore locates at $\lambda$ = `r log_lambda1[which.min(mse_test1)]`.
+
+To further finalize the $\lambda$ value (with higher decimal digits regarding higher precision), we further narrow down $\lambda$ range to (1.4, 1.6) and sequence this range with an increment of 0.001.
+
+```{r}
+
+  log_lambda2 = seq(1.4,1.6, 0.001)
+  lam2 = 10^log_lambda2
+  mse_test2 =  vapply(lam2, function(x) mse_ridge_resid(form, x, ridge_train, ridge_test), as.numeric(NA))
+  plot(log_lambda2, mse_test2)
+  log_lambda2[which.min(mse_test2)]
+```
+
+Finally, `vapply` this range of $\lambda$ values onto `mse_ridge_resid` function and plot the **MSE** scores over $\lambda$. We are able to finalize the best choice of $\lambda$ value to `r log_lambda2[which.min(mse_test2)]`.

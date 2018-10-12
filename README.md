@@ -12,5 +12,4 @@ calls `lm`. You can use it like this:
 ```{R}
 library(bis557)
 fit <- linear_model(Sepal.Length ~., iris)
-summary(fit)
 ```
