@@ -16,29 +16,31 @@ kernal : 1/h * K(x/h)
 Epanechnikov kernel is given by 
 $K(x) = \frac{3}{4} (1-x^2) . 1_{|x| \leq 1}$
 ```{r}
+#calculate Epanechnikov kernel
 kernel_epan <-function(x, h=1){
 x <- x / h
 ran <- as.numeric(abs(x) <= 1)
-val <- (3/4) * ( 1 - x^2 ) * ran
-val
+val <- (3/4) * ( 1 - x^2 ) * ran * (1/h)
+return(val)
 }
 
+# calculate kernel density
+# input x is a training vector; x_new is a test set, h is bandwith
+# output a kernel density estimation from Epanechnikov kernel 
 kern_density <- function(x, x_new, h=1){
-  X <- cbind(1, x)
   sapply(x_new, function(v){
-  w <- kernel_epan((x_new - v), h=h)
-  dens <- w/length(x_new)
+  w <- kernel_epan((x - v), h=h)
+  dens <- sum(w)/length(x)
   dens
 })
 }
 
 #checking the visual implementation results
 x <- rnorm(100)
-x_new <- rnorm(100)
-dens1 <- kern_density(x, x_new, h=1)[100,]
-plot(y = dens1, x = x)
-dens2 <- kern_density(x, x_new, h=10)[100,]
-plot(y = dens2, x = x )
+x_new <- sort(rnorm(100))
+dens1 <- kern_density(x, x_new, h=1)
+plot(y = dens1, x = x_new, main = "Kernal density estimation with bandwith = 1", ylim = c(0,0.5))
+curve(dnorm(x,0,1), col="darkblue", lwd=2, add=TRUE)
 ```
 
 ##Q2
