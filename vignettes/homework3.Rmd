@@ -1,0 +1,94 @@
+---
+title: "Homework3"
+output: rmarkdown::html_vignette
+author: Yiziying Chen
+vignette: >
+  %\VignetteIndexEntry{Homework3}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+##Q1
+Write a function `kern_density` that accepts a training vector x, bandwidth h, and test set x_new, returning the kernel density estimate from the Epanechnikov kernel. Visually test how this performs for some hand constructed datasets and bandwidths.
+
+
+kernal : 1/h * K(x/h)
+Epanechnikov kernel is given by 
+$K(x) = \frac{3}{4} (1-x^2) . 1_{|x| \leq 1}$
+```{r}
+kernel_epan <-function(x, h=1){
+x <- x / h
+ran <- as.numeric(abs(x) <= 1)
+val <- (3/4) * ( 1 - x^2 ) * ran
+val
+}
+
+kern_density <- function(x, x_new, h=1){
+  X <- cbind(1, x)
+  sapply(x_new, function(v){
+  w <- kernel_epan((x_new - v), h=h)
+  dens <- w/length(x_new)
+  dens
+})
+}
+
+#checking the visual implementation results
+x <- rnorm(100)
+x_new <- rnorm(100)
+dens1 <- kern_density(x, x_new, h=1)[100,]
+plot(y = dens1, x = x)
+dens2 <- kern_density(x, x_new, h=10)[100,]
+plot(y = dens2, x = x )
+```
+
+##Q2
+###Show that if f and g are both convex functions, then their sum must also be convex.
+
+For convect functions $f$ and $g$, assuming $0\leq \lambda \leq 1$, the definition of convextivity shows:
+
+$f(\lambda x + (1-\lambda)x) \leq \lambda f(x) + (1-\lambda) f(x)$. 
+
+So, $h = f+g$ where f and g are convex satisfies:
+
+$h(\lambda x + (1-\lambda)x) = f(\lambda x + (1-\lambda)x) + g(\lambda x + (1-\lambda)x) \leq \lambda (f(x) + g(x)) + (1-\lambda)(f(x) + g(x))$
+
+##Q3
+###Illustrate that the absolute value function is convex. Using the result from the previous exercise, show that the `1-norm is also convex.
+
+By definition, f is convext on real interval $I$ if and only if: $\forall x, y \in I: \forall \alpha, \beta \in \mathbb{R}_{>0} , \alpha + \beta = 1 : f(\alpha x+ \beta y) \leq \alpha f(x) + \beta f(y)$.
+
+Proof of absolute value function is convex:
+
+Let x, y $\in \mathbb{R}$, let $\alpha$, $\beta$ $\in \mathbb{R}_{>0}$ where $\alpha + \beta = 1$.
+
+$f(\alpha x + \beta y) = |\alpha x + \beta y| \leq |\alpha x| + |\beta y | = |\alpha| |x| + |\beta| |y| = \alpha |x| + \beta |y| = \alpha f(x) + \beta f(y)$
+
+therefore, $f(\alpha x + \beta y) \leq \alpha f(x) + \beta f(y)$, proving the convexity.
+
+
+
+##Q4-7.28
+###Prove that the elastic net objective function is convex using the results from the previous two exercises.
+
+Given a data matrix X and response vector y, the elastic net is defined as the solution to the optimization task
+$$arg min \left \{ \frac1{2n} ||y-Xb||^2_2 + \lambda((1-\alpha) \frac1{2} ||b||^2_2 + \alpha ||b||_1) \right\}$$
+for any values $\lambda >0$ and $\alpha \in [0,1]$.
+
+Based on the result from part(b) that the absolute value function is convex, we can say the terms $\frac1{2n} ||y-Xb||^2_2$,  $\lambda((1-\alpha) \frac1{2} ||b||^2_2$ and $\alpha ||b||_1$ are all convex; based on the result from part(a), we can say the sum of the above 3 terms are also convex. Therefore, the elastic net( as the argmin of the sum of 3 absolute values) is also convex.
+
+
+##Q5-7.31
+###Find the KKT conditions for glmnet when $\alpha = 1$  and implement a `lasso_reg_with_screening` function that takes an $\alpha$ parameter. 
+
+Use glmnet to get all the coefficients and sum to 0. Use KKT to check any violation.
+```{r}
+lasso_reg_with_screening <- function(X, y, b, lambda)
+{
+resids <- y - X %*% b
+s <- apply(X, 2, function(xj) crossprod(xj, resids)) / lambda / nrow(X)
+# Return a vector indicating where the KKT conditions have been violated by the variables that are currently zero.
+(b == 0) & (abs(s) >= 1)
+}
+```
+
+
