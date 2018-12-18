@@ -162,13 +162,13 @@ for (i in 1:length(y_train)){
     count1 = count1 + 1
   }
 }
-
+#kernal size changes
 a1 = count1 / length(y_train)
-a1
 a1.2 = 0.03837881
 a1.3 = 0.02745526
 a1.3.5 = 0.04377302
 a1.4 = 0.0306535
+#pool size changes
 a2.3 = 0.01792813
 a2.3.5 = 0.03743285
 a2.4 = 0.02708364
@@ -307,4 +307,4 @@ l2_norm[i] <- sum((weights[[1]]$w)^2)
 l2_norm
 ```
 
-With absolute deviation loss function derivative, we have see the size of weights decrease as the penalty term increases. Compared with using mse (6.942948e+00, 1.674410e+00, 3.672386e-02, 7.117368e-07), the decrease in weights is smaller using absolute deviation loss function.
+With absolute deviation loss function derivative, we have see the size of weights decrease as the penalty term increases (11.991938,3.70796,1.45447,1.309176). Compared with using mse (6.942948e+00, 1.674410e+00, 3.672386e-02, 7.117368e-07), the decrease in weights is smaller using absolute deviation loss function.
