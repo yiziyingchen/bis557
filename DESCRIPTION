@@ -8,7 +8,7 @@ Description: Assignments, code, and digital artifacts for BIS 557.
 License: Apache License 2.0
 RoxygenNote: 6.1.0
 Suggests: testthat, knitr, rmarkdown
-Imports: stats, ggplot2, MASS, keras
+Imports: stats, ggplot2, MASS, keras, e1071
 VignetteBuilder: knitr
 Encoding: UTF-8
 Depends: R (>= 2.10)

@@ -9,7 +9,12 @@ vignette: >
 ---
 
 1.
-```{r}
+the code used below was taken from:
+https://keras.rstudio.com/articles/examples/mnist_cnn.html
+
+-----------------------------------------------------------------------------------------
+```{r eval=FALSE}
+install.packages("keras")
 library(keras)
 library(bis557)
 # Data Preparation -----------------------------------------------------
@@ -95,13 +100,26 @@ cat('Test accuracy:', scores[[2]], '\n')
 
 cat('Train loss:', l[[1]], '\n')
 cat('Train accuracy:', l[[2]], '\n')
-```
-The train loss and test loss values are given from the images as predictive features for accuracy.
 
+----------------------------------------------------------------------------------------
+
+sd(x_train)
+mean(x_train)
+kurtosis(x_train)
+
+sd(x_test)
+mean(x_test)
+kurtosis(x_test)
+```
+
+The train loss and test loss values are given from the images as predictive features for accuracy.
+The test loss has a value of 0.02102579 and accuracy of 0.9927; Train loss has a value of 0.05050852 and accuracy of 0.9845833.
 
 
 2.
-```{r}
+Note :because emnist_train and emnits_test have big sizes and exceed CRAN package size limit, I won't include these 2 data packages into bis557.
+```{r eval=FALSE}
+
 data("emnist_test") 
 data("emnist_train")
 y_test = as.matrix(emnist_test$`1`)
