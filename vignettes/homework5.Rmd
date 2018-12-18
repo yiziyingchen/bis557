@@ -155,6 +155,7 @@ layer_activation(activation = "softmax")
 model %>% compile(loss = 'categorical_crossentropy',
 optimizer = optimizer_rmsprop(), metrics = c('accuracy'))
 
+#check train accuracy
 p1 <- predict_classes(model, x_train)
 count1 = 0
 for (i in 1:length(y_train)){
@@ -162,8 +163,18 @@ for (i in 1:length(y_train)){
     count1 = count1 + 1
   }
 }
+
+#check test accuracy
+p2 <- predict_classes(model, x_test)
+count2 = 0
+for (i in 1:length(y_test)){
+  if (y_test[i] == p2[i]){
+    count2 = count2 + 1
+  }
+}
 #kernal size changes
 a1 = count1 / length(y_train)
+
 a1.2 = 0.03837881
 a1.3 = 0.02745526
 a1.3.5 = 0.04377302
