@@ -23,5 +23,23 @@ NULL
 #' @docType data 
 #' @rdname ridge_test
 #' @description In homework 2 we explore the choice of lambda
-#' on ridge regressions. This data set gives us a basis for exploration.
+#' on ridge regressions. This data set gives us a basis for validation.
+NULL
+
+#' A train data for the fifth homework
+#'
+#' @name emnist_train
+#' @docType data
+#' @rdname emnist_train
+#' @description In homework 5 we explore the neural networks
+#' This data set gives us a basis for exploration.
+NULL
+
+#' A test data for the fifth homework
+#'
+#' @name emnist_test
+#' @docType data
+#' @rdname emnist_test
+#' @description In homework 5 we explore the neural networks
+#' This data set gives us a basis for validation.
 NULL

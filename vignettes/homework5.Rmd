@@ -1,0 +1,292 @@
+---
+title: "BIS557 Homework-5 Neural Networks"
+output: rmarkdown::html_vignette
+author: Yiziying Chen
+vignette: >
+  %\VignetteIndexEntry{Put the title of your vignette here}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+1.
+```{r}
+library(keras)
+library(bis557)
+# Data Preparation -----------------------------------------------------
+
+batch_size <- 128
+num_classes <- 10
+epochs <- 2
+
+# Input image dimensions
+img_rows <- 28
+img_cols <- 28
+
+# The data, shuffled and split between train and test sets
+mnist <- dataset_mnist()
+x_train <- mnist$train$x
+y_train <- mnist$train$y
+x_test <- mnist$test$x
+y_test <- mnist$test$y
+
+# Redefine  dimension of train/test inputs
+x_train <- array_reshape(x_train, c(nrow(x_train), img_rows, img_cols, 1))
+x_test <- array_reshape(x_test, c(nrow(x_test), img_rows, img_cols, 1))
+input_shape <- c(img_rows, img_cols, 1)
+
+# Transform RGB values into [0,1] range
+x_train <- x_train / 255
+x_test <- x_test / 255
+
+cat('x_train_shape:', dim(x_train), '\n')
+cat(nrow(x_train), 'train samples\n')
+cat(nrow(x_test), 'test samples\n')
+
+# Convert class vectors to binary class matrices
+y_train <- to_categorical(y_train, num_classes)
+y_test <- to_categorical(y_test, num_classes)
+
+# Define Model -----------------------------------------------------------
+
+# Define model
+model <- keras_model_sequential() %>%
+  layer_conv_2d(filters = 32, kernel_size = c(3,3), activation = 'relu',
+                input_shape = input_shape) %>% 
+  layer_conv_2d(filters = 64, kernel_size = c(3,3), activation = 'relu') %>% 
+  layer_max_pooling_2d(pool_size = c(2, 2)) %>% 
+  layer_dropout(rate = 0.25) %>% 
+  layer_flatten() %>% 
+  layer_dense(units = 128, activation = 'relu') %>% 
+  layer_dropout(rate = 0.5) %>% 
+  layer_dense(units = num_classes, activation = 'softmax')
+
+# Compile model
+model %>% compile(
+  loss = loss_categorical_crossentropy,
+  optimizer = optimizer_adadelta(),
+  metrics = c('accuracy')
+)
+
+# Train model
+model %>% fit(
+  x_train, y_train,
+  batch_size = batch_size,
+  epochs = epochs,
+  validation_split = 0.2
+)
+
+model %>% fit(
+  x_test, y_test,
+  batch_size = batch_size,
+  epochs = epochs,
+  validtaion_split = 0.2
+)
+
+scores <- model %>% evaluate(
+  x_test, y_test, verbose = 0
+)
+
+l <- model %>% evaluate(
+  x_train, y_train, verbose = 0
+)
+# Output metrics
+cat('Test loss:', scores[[1]], '\n')
+cat('Test accuracy:', scores[[2]], '\n')
+
+cat('Train loss:', l[[1]], '\n')
+cat('Train accuracy:', l[[2]], '\n')
+```
+The train loss and test loss values are given from the images as predictive features for accuracy.
+
+
+
+2.
+```{r}
+data("emnist_test") 
+data("emnist_train")
+y_test = as.matrix(emnist_test$`1`)
+x_test = as.matrix(emnist_test[,-1])
+y_train = as.matrix(emnist_train$`23`)
+x_train = as.matrix(emnist_train[,-1])
+x_train <- array_reshape(x_train, c(nrow(x_train), 28, 28, 1))
+x_test <- array_reshape(x_test, c(nrow(x_test), 28, 28, 1))
+
+
+model <- keras_model_sequential()
+model %>% layer_conv_2d(filters = 32, kernel_size = c(4,4),
+input_shape = c(28, 28, 1), padding = "same") %>%
+layer_activation(activation = "relu") %>% layer_conv_2d(filters = 32, kernel_size = c(4,4),
+padding = "same") %>%layer_activation(activation = "relu") %>%
+layer_max_pooling_2d(pool_size = c(4, 4)) %>% layer_dropout(rate = 0.5) %>%
+layer_conv_2d(filters = 32, kernel_size = c(4,4), padding = "same") %>%
+layer_activation(activation = "relu") %>%
+layer_conv_2d(filters = 32, kernel_size = c(4,4),
+padding = "same") %>%
+layer_activation(activation = "relu") %>%
+layer_max_pooling_2d(pool_size = c(4, 4)) %>%
+layer_dropout(rate = 0.5) %>%
+layer_flatten() %>%
+layer_dense(units = 128) %>%
+layer_activation(activation = "relu") %>%
+layer_dense(units = 128) %>%
+layer_activation(activation = "relu") %>%
+layer_dropout(rate = 0.5) %>%
+layer_dense(units = 26) %>%
+layer_activation(activation = "softmax")
+
+model %>% compile(loss = 'categorical_crossentropy',
+optimizer = optimizer_rmsprop(), metrics = c('accuracy'))
+
+p1 <- predict_classes(model, x_train)
+count1 = 0
+for (i in 1:length(y_train)){
+  if (y_train[i] == p1[i]){
+    count1 = count1 + 1
+  }
+}
+
+a1 = count1 / length(y_train)
+a1
+a1.2 = 0.03837881
+a1.3 = 0.02745526
+a1.3.5 = 0.04377302
+a1.4 = 0.0306535
+a2.3 = 0.01792813
+a2.3.5 = 0.03743285
+a2.4 = 0.02708364
+a4.4 = 0.0382115
+```
+
+When changing kernal size from c(2,2) to c(4,4), the accuracy does not necessarily increase all the way, it decreases at kernal size = c(3,3) and increases at kernal size = c(3.5, 3.5), and further decreases at kernal size = c(4,4). Also, changing pool size does not necessarily increase accuracy. Compared with at pool size = c(2,2), accuracy decreases at pool size c(3,3) and increases at pool size = c(3.5, 3.5) and further decreases at pool size = c(4,4). So in order to improve classfication rate, we need to perform multiple tries to find the optimal accuracy when changing kernal size or pool size.
+
+3.
+```{r}
+# Inputs: y, response vector; a, predicted
+# response
+# Output: gradient of the absolute deviation loss function
+abs_p <- function(y, a) {
+  if(a<y){
+    der = -1
+  }
+  if(a>=y){
+    der = 1
+  }
+der
+}
+
+# Inputs: v, a vector, matrix or array
+# Output: input with negative terms pushed to zero
+ReLU <- function(v) {
+v[v < 0] <- 0
+v
+}
+
+# Inputs: v, a vector, matrix or array
+# Output: converts positive terms to one and
+# non-positive terms to zero.
+ReLU_p <- function(v) {
+  p <- v * 0
+p[v > 0] <- 1
+p
+}
+
+
+# Inputs: sizes, a vector giving the size of
+# layer in the neural network, including
+# the input and output layers
+# Output: a list containing initialized weights,
+# biases, and momentums
+make_weights <- function(sizes) {
+L <- length(sizes) - 1
+weights <- vector("list", L)
+for (j in seq_len(L)) {
+w <- matrix(rnorm(sizes[j] * sizes[j + 1],
+sd = 1/sqrt(sizes[j])),
+ncol = sizes[j],
+nrow = sizes[j + 1])
+v <- matrix(0,
+ncol = sizes[j],
+nrow = sizes[j + 1])
+weights[[j]] <- list(w = w,
+v = v,
+b = rnorm(sizes[j + 1]))
+}
+weights
+}
+
+f_prop <- function(x, weights, sigma) {
+L <- length(weights)
+z <- vector("list", L)
+a <- vector("list", L)
+for (j in seq_len(L)) {
+a_j1 <- if(j == 1) x else a[[j - 1L]]
+z[[j]] <- weights[[j]]$w %*% a_j1 + weights[[j]]$b
+a[[j]] <- if (j != L) sigma(z[[j]]) else z[[j]]
+}
+return(list(z = z, a = a))
+}
+
+b_prop <- function(x, y, weights, f_obj, sigma_p, f_p) {
+z <- f_obj$z; a <- f_obj$a
+L <- length(weights)
+grad_z <- vector("list", L)
+grad_w <- vector("list", L)
+for (j in rev(seq_len(L))) {
+if (j == L) {
+grad_z[[j]] <- f_p(y, a[[j]])
+} else {
+grad_z[[j]] <- (t(weights[[j + 1]]$w) %*%
+grad_z[[j + 1]]) * sigma_p(z[[j]])
+}
+a_j1 <- if(j == 1) x else a[[j - 1L]]
+grad_w[[j]] <- grad_z[[j]] %*% t(a_j1)
+}
+return(list(grad_z = grad_z, grad_w = grad_w))
+}
+
+
+# Inputs: X, data matrix; y, response; sizes, vector
+# given the number of neurons in each layer of
+# the neural network; epochs, integer number of
+# epochs to complete; eta, learning rate; mu,
+# momentum term; l2, penalty term for l2-norm;
+# weights, optional list of starting weights
+# Output: the trained weights for the neural network
+nn_sgd <- function(X, y, sizes, epochs, eta, mu = 0,
+l2 = 0, weights = NULL) {
+if (is.null(weights))
+weights <- make_weights(sizes)
+for (epoch in seq_len(epochs)) {
+for (i in seq_len(nrow(X))) {
+f_obj <- f_prop(X[i,], weights, ReLU)
+b_obj <- b_prop(X[i,], y[i,], weights, f_obj,
+ReLU_p, abs_p)
+for (j in seq_along(b_obj)) {
+weights[[j]]$b <- weights[[j]]$b -
+eta * b_obj$grad_z[[j]]
+weights[[j]]$v <- mu * weights[[j]]$v -
+eta * b_obj$grad_w[[j]]
+weights[[j]]$w <- (1 - eta * l2) *
+weights[[j]]$w +
+weights[[j]]$v
+}
+}
+}
+return(weights)
+}
+
+l2_norm <- rep(NA_real_, 3)
+l2_vals <- c(0, 0.01, 0.04, 0.05)
+X <- matrix(runif(1000, min = -1, max = 1), ncol = 1)
+y <- X[,1,drop = FALSE]^2 + rnorm(1000, sd = 0.1)
+weights_start <- make_weights(sizes = c(1, 10, 1))
+for (i in seq_along(l2_vals)) {
+weights <- nn_sgd(X, y, weights = weights_start,
+epochs = 10, eta = 0.1,
+l2 = l2_vals[i])
+l2_norm[i] <- sum((weights[[1]]$w)^2)
+}
+l2_norm
+```
+
+With absolute deviation loss function derivative, we have see the size of weights decrease as the penalty term increases. Compared with using mse (6.942948e+00, 1.674410e+00, 3.672386e-02, 7.117368e-07), the decrease in weights is smaller using absolute deviation loss function.

@@ -6,5 +6,5 @@
 \title{A test data for the second homework}
 \description{
 In homework 2 we explore the choice of lambda
-on ridge regressions. This data set gives us a basis for exploration.
+on ridge regressions. This data set gives us a basis for validation.
 }
